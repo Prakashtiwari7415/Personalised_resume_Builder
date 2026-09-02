@@ -31,6 +31,24 @@ def process_resume(file_obj, location, groq_key_input="", serper_key_input="", m
         err_msg = "### ⚠️ Missing File\n\nPlease upload a resume file in PDF or DOCX format."
         return err_msg, err_msg, err_msg, None, None
 
+    # DEBUG: inspect uploaded file object (prints to container logs)
+    try:
+        uploaded_name = getattr(file_obj, "name", None)
+        print(f"DEBUG uploaded object type: {type(file_obj)}, name: {uploaded_name}")
+        if uploaded_name and os.path.exists(uploaded_name):
+            print("DEBUG path exists, size:", os.path.getsize(uploaded_name))
+        else:
+            if hasattr(file_obj, "file"):
+                try:
+                    file_obj.file.seek(0, 2)  # seek to end
+                    s = file_obj.file.tell()
+                    file_obj.file.seek(0)
+                    print("DEBUG file-like size:", s)
+                except Exception:
+                    pass
+    except Exception as de:
+        print("DEBUG inspect upload failed:", de)
+
     resume_text, extract_error = extract_text_from_resume(file_obj)
     if extract_error:
         err_msg = f"### ⚠️ File Error\n\n{extract_error}"
