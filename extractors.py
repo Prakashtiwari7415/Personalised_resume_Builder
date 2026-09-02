@@ -5,7 +5,7 @@ Robustly handles Gradio upload objects, SpooledTemporaryFile, dicts, and paths.
 
 import os
 import io
-import pymupdf  # PyMuPDF
+import fitz  # PyMuPDF
 import docx  # python-docx
 
 
