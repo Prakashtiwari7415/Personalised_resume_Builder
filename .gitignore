@@ -1,0 +1,25 @@
+# Environment & secrets
+.env
+.env.local
+*.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Temporary / Zip / Checkpoints
+*.zip
+*.log
+temp_*
+test_*
+.ipynb_checkpoints/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/

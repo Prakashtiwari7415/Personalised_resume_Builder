@@ -1,0 +1,7 @@
+PyMuPDF>=1.26.0
+python-docx>=1.2.0
+gradio>=4.0.0
+crewai>=0.100.0
+crewai-tools>=0.30.0
+litellm>=1.0.0
+python-dotenv>=1.0.0

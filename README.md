@@ -55,4 +55,3 @@ python app.py
 
 Open your browser and navigate to:
 `http://localhost:7860`
-# Personalised_resume_Builder
