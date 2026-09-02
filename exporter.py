@@ -7,6 +7,35 @@ import re
 from fpdf import FPDF
 from config import EXPORT_DIR
 
+
+def sanitize_for_pdf(text):
+    """
+    Sanitizes Unicode characters (non-breaking spaces, smart quotes, em-dashes)
+    to Latin-1 compatible characters for FPDF2 rendering.
+    """
+    if not text:
+        return ""
+    
+    replacements = {
+        '\u202f': ' ',  # Narrow non-breaking space
+        '\xa0': ' ',    # Non-breaking space
+        '\u200b': '',   # Zero-width space
+        '\u2013': '-',  # En-dash
+        '\u2014': '-',  # Em-dash
+        '\u2018': "'",  # Left single quote
+        '\u2019': "'",  # Right single quote
+        '\u201c': '"',  # Left double quote
+        '\u201d': '"',  # Right double quote
+        '\u2022': '*',  # Bullet point
+        '\u2026': '...',# Ellipsis
+    }
+    
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+        
+    return text.encode('latin-1', 'replace').decode('latin-1')
+
+
 class ResumePDF(FPDF):
     def header(self):
         self.set_font('Helvetica', 'B', 10)
@@ -32,7 +61,7 @@ def export_markdown(markdown_text, filename="optimized_resume.md"):
 
 def export_pdf(markdown_text, filename="optimized_resume.pdf"):
     """
-    Converts Markdown resume into a clean PDF document using FPDF2.
+    Converts Markdown resume into a clean PDF document using FPDF2 with Unicode sanitization.
     """
     os.makedirs(EXPORT_DIR, exist_ok=True)
     file_path = os.path.join(EXPORT_DIR, filename)
@@ -41,8 +70,9 @@ def export_pdf(markdown_text, filename="optimized_resume.pdf"):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Clean thinking tags if present
+    # Clean thinking tags if present and sanitize Unicode
     clean_text = re.sub(r'<think>.*?</think>', '', markdown_text, flags=re.DOTALL).strip()
+    clean_text = sanitize_for_pdf(clean_text)
     lines = clean_text.splitlines()
 
     for line in lines:
