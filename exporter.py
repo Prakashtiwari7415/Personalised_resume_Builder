@@ -52,69 +52,78 @@ class ResumePDF(FPDF):
 
 def export_markdown(markdown_text, filename="optimized_resume.md"):
     """Saves Markdown text to a downloadable file."""
-    os.makedirs(EXPORT_DIR, exist_ok=True)
-    file_path = os.path.join(EXPORT_DIR, filename)
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(markdown_text)
-    return file_path
+    try:
+        os.makedirs(EXPORT_DIR, exist_ok=True)
+        file_path = os.path.join(EXPORT_DIR, filename)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(markdown_text)
+        return file_path
+    except Exception as e:
+        print(f"⚠️ Warning: Failed to export Markdown file: {e}")
+        return None
 
 
 def export_pdf(markdown_text, filename="optimized_resume.pdf"):
     """
-    Converts Markdown resume into a clean PDF document using FPDF2 with Unicode sanitization.
+    Converts Markdown resume into a clean PDF document using FPDF2 with Unicode sanitization
+    and layout error protection.
     """
-    os.makedirs(EXPORT_DIR, exist_ok=True)
-    file_path = os.path.join(EXPORT_DIR, filename)
+    try:
+        os.makedirs(EXPORT_DIR, exist_ok=True)
+        file_path = os.path.join(EXPORT_DIR, filename)
 
-    pdf = ResumePDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
+        pdf = ResumePDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Clean thinking tags if present and sanitize Unicode
-    clean_text = re.sub(r'<think>.*?</think>', '', markdown_text, flags=re.DOTALL).strip()
-    clean_text = sanitize_for_pdf(clean_text)
-    lines = clean_text.splitlines()
+        # Clean thinking tags if present and sanitize Unicode
+        clean_text = re.sub(r'<think>.*?</think>', '', markdown_text, flags=re.DOTALL).strip()
+        clean_text = sanitize_for_pdf(clean_text)
+        lines = clean_text.splitlines()
 
-    for line in lines:
-        line_str = line.strip()
-        if not line_str:
-            pdf.ln(3)
-            continue
+        for line in lines:
+            line_str = line.strip()
+            if not line_str:
+                pdf.ln(3)
+                continue
 
-        # Header 1
-        if line_str.startswith("# "):
-            pdf.set_font("Helvetica", "B", 16)
-            pdf.set_text_color(30, 41, 59)
-            pdf.cell(0, 10, line_str[2:].strip(), align="L")
-            pdf.ln(8)
+            # Header 1
+            if line_str.startswith("# "):
+                pdf.set_font("Helvetica", "B", 15)
+                pdf.set_text_color(30, 41, 59)
+                pdf.multi_cell(0, 8, line_str[2:].strip())
+                pdf.ln(4)
 
-        # Header 2
-        elif line_str.startswith("## "):
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.set_text_color(79, 70, 229)
-            pdf.cell(0, 8, line_str[3:].strip(), align="L")
-            pdf.ln(6)
+            # Header 2
+            elif line_str.startswith("## "):
+                pdf.set_font("Helvetica", "B", 12)
+                pdf.set_text_color(79, 70, 229)
+                pdf.multi_cell(0, 7, line_str[3:].strip())
+                pdf.ln(3)
 
-        # Header 3
-        elif line_str.startswith("### "):
-            pdf.set_font("Helvetica", "B", 11)
-            pdf.set_text_color(51, 65, 85)
-            pdf.cell(0, 7, line_str[4:].strip(), align="L")
-            pdf.ln(5)
+            # Header 3
+            elif line_str.startswith("### "):
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(51, 65, 85)
+                pdf.multi_cell(0, 6, line_str[4:].strip())
+                pdf.ln(2)
 
-        # Bullet point
-        elif line_str.startswith("- ") or line_str.startswith("* "):
-            pdf.set_font("Helvetica", "", 10)
-            pdf.set_text_color(51, 65, 85)
-            text_body = re.sub(r'\*\*(.*?)\*\*', r'\1', line_str[2:])  # strip markdown bold
-            pdf.multi_cell(0, 6, f"  * {text_body}")
+            # Bullet point
+            elif line_str.startswith("- ") or line_str.startswith("* "):
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(51, 65, 85)
+                text_body = re.sub(r'\*\*(.*?)\*\*', r'\1', line_str[2:])  # strip markdown bold
+                pdf.multi_cell(0, 6, f"  * {text_body}")
 
-        # Regular Body text
-        else:
-            pdf.set_font("Helvetica", "", 10)
-            pdf.set_text_color(51, 65, 85)
-            text_body = re.sub(r'\*\*(.*?)\*\*', r'\1', line_str)
-            pdf.multi_cell(0, 6, text_body)
+            # Regular Body text
+            else:
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(51, 65, 85)
+                text_body = re.sub(r'\*\*(.*?)\*\*', r'\1', line_str)
+                pdf.multi_cell(0, 6, text_body)
 
-    pdf.output(file_path)
-    return file_path
+        pdf.output(file_path)
+        return file_path
+    except Exception as e:
+        print(f"⚠️ Warning: PDF generation failed ({e}). Returning None for export.")
+        return None

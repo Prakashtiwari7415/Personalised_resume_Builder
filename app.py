@@ -51,9 +51,17 @@ def process_resume(file_obj, location, groq_key_input="", serper_key_input="", m
             selected_model=selected_model
         )
 
-        # Generate download export files
-        md_path = export_markdown(improved_resume, "optimized_resume.md")
-        pdf_path = export_pdf(improved_resume, "optimized_resume.pdf")
+        # Isolated export handlers (prevent export issues from failing main AI outputs)
+        md_path, pdf_path = None, None
+        try:
+            md_path = export_markdown(improved_resume, "optimized_resume.md")
+        except Exception as e:
+            print(f"⚠️ Markdown export skipped: {e}")
+
+        try:
+            pdf_path = export_pdf(improved_resume, "optimized_resume.pdf")
+        except Exception as e:
+            print(f"⚠️ PDF export skipped: {e}")
 
         return feedback, improved_resume, job_matches, md_path, pdf_path
 
